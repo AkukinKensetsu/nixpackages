@@ -1,19 +1,22 @@
 {
   lib,
-  fetchFromGitHub,
+  stdenvNoCC,
+  source,
   ...
 }:
-fetchFromGitHub {
-  pname = "San-Francisco-Pro-Fonts";
-  owner = "sahibjotsaggu";
-  repo = "San-Francisco-Pro-Fonts";
-  rev = "8bfea09aa6f1139479f80358b2e1e5c6dc991a58";
-  fetchSubmodules = false;
-  sha256 = "sha256-8XVzzBDKnezRElyCwDQJ5VZP7ARuDxyi0Z8TFNGz2p0";
+stdenvNoCC.mkDerivation {
+  inherit (source) pname src version;
 
-  postFetch = ''
+  buildPhase = ''
+    runHook preBuild
+
+    # Create the destination directory
     mkdir -p $out/share/fonts/San-Francisco-Pro
-    cp -r $out/*.ttf $out/share/fonts/San-Francisco-Pro
+
+    # Copy the .ttf files to the destination directory
+    cp -r $src/*.ttf $out/share/fonts/San-Francisco-Pro
+
+    runHook postBuild
   '';
 
   meta = with lib; {

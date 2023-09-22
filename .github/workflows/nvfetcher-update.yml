@@ -1,0 +1,29 @@
+name: nvfetcher update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # Daily
+
+jobs:
+  update-nvfetcher:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v25
+
+      - name: Update nvfetcher
+        id: update
+        run: |
+          pushd pkgs
+          nix run github:berberman/nvfetcher -- --commit-changes
+          popd
+
+      - name: merge
+        run: |
+          gh pr merge ${{ steps.update.outputs.pull-request-number }} --squash --delete-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

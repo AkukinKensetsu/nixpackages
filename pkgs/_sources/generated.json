@@ -1,0 +1,41 @@
+{
+    "multicolor-sddm-theme": {
+        "cargoLocks": null,
+        "date": "2022-10-17",
+        "extract": null,
+        "name": "multicolor-sddm-theme",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "rev": "798507a2362459a6084d7c140c67c23702913c8c",
+            "sha256": "sha256-K6drHG564BDz4+iYZo14Pdd2gOMp+GXmxsUEnTu8DaI=",
+            "type": "git",
+            "url": "https://gitlab.com/dwt1/multicolor-sddm-theme"
+        },
+        "version": "798507a2362459a6084d7c140c67c23702913c8c"
+    },
+    "san-francisco-pro": {
+        "cargoLocks": null,
+        "date": "2021-06-22",
+        "extract": null,
+        "name": "san-francisco-pro",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "sahibjotsaggu",
+            "repo": "San-Francisco-Pro-Fonts",
+            "rev": "8bfea09aa6f1139479f80358b2e1e5c6dc991a58",
+            "sha256": "sha256-mAXExj8n8gFHq19HfGy4UOJYKVGPYgarGd/04kUIqX4=",
+            "type": "github"
+        },
+        "version": "8bfea09aa6f1139479f80358b2e1e5c6dc991a58"
+    }
+}

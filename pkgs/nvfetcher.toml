@@ -1,0 +1,7 @@
+[multicolor-sddm-theme]
+src.git = "https://gitlab.com/dwt1/multicolor-sddm-theme"
+fetch.git = "https://gitlab.com/dwt1/multicolor-sddm-theme"
+
+[san-francisco-pro]
+src.git = "https://github.com/sahibjotsaggu/San-Francisco-Pro-Fonts"
+fetch.github = "sahibjotsaggu/San-Francisco-Pro-Fonts"
