@@ -1,62 +1,63 @@
-{ lib
-, stdenv
-, fetchurl
-, autoPatchelfHook
-, dpkg
-, makeWrapper
-, wrapGAppsHook
-, alsa-lib
-, at-spi2-atk
-, at-spi2-core
-, atk
-, cairo
-, cups
-, dbus
-, expat
-, ffmpeg
-, fontconfig
-, freetype
-, gdk-pixbuf
-, glib
-, gtk3
-, libappindicator-gtk3
-, libdrm
-, libnotify
-, libpulseaudio
-, libsecret
-, libuuid
-, libxkbcommon
-, mesa
-, nss
-, pango
-, systemd
-, xdg-utils
-, xorg
-, wayland
-, pipewire
+{
+  lib,
+  stdenv,
+  fetchurl,
+  autoPatchelfHook,
+  dpkg,
+  makeWrapper,
+  wrapGAppsHook,
+  alsa-lib,
+  at-spi2-atk,
+  at-spi2-core,
+  atk,
+  cairo,
+  cups,
+  dbus,
+  expat,
+  ffmpeg,
+  fontconfig,
+  freetype,
+  gdk-pixbuf,
+  glib,
+  gtk3,
+  libappindicator-gtk3,
+  libdrm,
+  libnotify,
+  libpulseaudio,
+  libsecret,
+  libuuid,
+  libxkbcommon,
+  mesa,
+  nss,
+  pango,
+  systemd,
+  xdg-utils,
+  xorg,
+  wayland,
+  pipewire,
 }:
-
 stdenv.mkDerivation rec {
   pname = "vesktop";
   version = "0.3.3";
 
-  # Copy paste from Vesktop
-  src =
-    let
-      base = "https://github.com/Vencord/Vesktop/releases/download";
-    in
-      {
-        x86_64-linux = fetchurl {
-          url = "${base}/v${version}/VencordDesktop_${version}_amd64.deb";
-          hash = "sha256-na/mcph9FkmUiLkpTMjl0ENbpJN1IvFC+eXVTSplP8g=";
-        };
-        aarch64-linux = fetchurl {
-          url = "${base}/v${version}/VencordDesktop_${version}_arm64.deb";
-          hash = "";
-        };
-      }.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
+  # Copy paste from Armcord
+  src = let
+    base = "https://github.com/Vencord/Vesktop/releases/download";
+  in
+    {
+      x86_64-linux = fetchurl {
+        url = "${base}/v${version}/VencordDesktop_${version}_amd64.deb";
+        hash = "sha256-na/mcph9FkmUiLkpTMjl0ENbpJN1IvFC+eXVTSplP8g=";
+      };
+      # aarch64-linux = fetchurl {
+      #   url = "${base}/v${version}/VencordDesktop_${version}_arm64.deb";
+      #   hash = "";
+      # };
+    }
+    .${stdenv.hostPlatform.system}
+    or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
 
-  nativeBuildInputs = [ autoPatchelfHook dpkg makeWrapper wrapGAppsHook ];
+  nativeBuildInputs = [autoPatchelfHook dpkg makeWrapper wrapGAppsHook];
 
   dontWrapGApps = true;
 
@@ -120,11 +121,11 @@ stdenv.mkDerivation rec {
       --prefix XDG_DATA_DIRS : "${gtk3}/share/gsettings-schemas/${gtk3.name}/" \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform=wayland --enable-features=UseOzonePlatform --enable-features=WebRTCPipeWireCapturer }}" \
       --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath buildInputs}" \
-      --suffix PATH : ${lib.makeBinPath [ xdg-utils ]}
+      --suffix PATH : ${lib.makeBinPath [xdg-utils]}
 
     # Fix desktop link
     substituteInPlace $out/share/applications/vencorddesktop.desktop \
-      --replace /opt/Vesktop/vencorddesktop $out/bin/
+      --replace /opt/Vesktop/ $out/bin/
 
     runHook postInstall
   '';
@@ -132,10 +133,13 @@ stdenv.mkDerivation rec {
   meta = {
     description = "A cross platform electron-based desktop app aiming to give you a snappier Discord experience with Vencord pre-installed";
     homepage = "https://github.com/Vencord/Vesktop";
-    sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
+    sourceProvenance = with lib.sourceTypes; [binaryNativeCode];
     license = lib.licenses.gpl3Plus;
-    maintainers = with lib.maintainers; [ ludovicopiero ];
-    platforms = [ "x86_64-linux" "aarch64-linux" ];
-    mainProgram = "Vesktop";
+    maintainers = with lib.maintainers; [ludovicopiero];
+    platforms = [
+      "x86_64-linux"
+      # "aarch64-linux"
+    ];
+    mainProgram = "vesktop";
   };
 }
