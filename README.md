@@ -11,4 +11,5 @@
 | 3.  | San Francisco Pro Fonts|
 | 4.  | Spotify                |
 | 5.  | TLauncher              |
-| 6.  | Webcord-Vencord        |
+| 6.  | Vesktop                |
+| 7.  | Webcord-Vencord        |

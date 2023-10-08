@@ -23,6 +23,8 @@
 
       TLauncher = pkgs.callPackage ./TLauncher {};
 
+      vesktop = pkgs.callPackage ./vesktop {};
+
       webcord-vencord = pkgs.callPackage ./webcord-vencord {};
     };
   };
