@@ -13,8 +13,8 @@ stdenvNoCC.mkDerivation {
     # Create the destination directory
     mkdir -p $out/share/fonts/San-Francisco-Pro
 
-    # Copy the .ttf files to the destination directory
-    cp -r $src/*.ttf $out/share/fonts/San-Francisco-Pro
+    # Copy the .ttf & .otf files to the destination directory
+    cp -r $src/*.ttf $src/*.otf $out/share/fonts/San-Francisco-Pro
 
     runHook postBuild
   '';
