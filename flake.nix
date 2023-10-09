@@ -2,7 +2,7 @@
   description = "Ludovico's nixpkgs";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-compat = {
       url = "github:edolstra/flake-compat";
