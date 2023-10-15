@@ -3,7 +3,7 @@
   substituteAll,
   lib,
   vencord-web-extension,
-  electron_24,
+  electron_27,
 }:
 (webcord.overrideAttrs (old: {
   pname = "webcord-vencord";
@@ -21,15 +21,9 @@
     old.meta
     // {
       description = "Webcord with Vencord web extension";
-      maintainers = with maintainers; [FlafyDev NotAShelf];
+      maintainers = with maintainers; [FlafyDev ludovicopiero NotAShelf];
     };
 }))
 .override {
-  /*
-  Latest Webcord update changed to downgrade Electron to version 25,
-  which unfortunately resulted in a segfault when launching Webcord-Vencord on Wayland.
-  Therefore, we decided to revert the downgrade for now.
-  It's possible that this issue will be resolved in Electron version 27
-  */
-  electron_25 = electron_24;
+  electron_25 = electron_27;
 }
