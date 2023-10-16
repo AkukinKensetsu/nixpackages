@@ -2,6 +2,10 @@ name: nvfetcher update
 
 on:
   workflow_dispatch:
+    inputs:
+      notify:
+        description: 'Whether to send notifications for this workflow run'
+        default: 'false'
   schedule:
     - cron: "0 0 * * *" # Daily
 
@@ -21,16 +25,31 @@ jobs:
           nix run github:berberman/nvfetcher
           popd
 
+      - name: Check Diff
+        id: check-diff
+        run: |
+          if git diff --exit-code; then
+            echo "No changes to commit."
+            exit 1
+          else
+            echo "Changes detected. Continuing with commit and PR."
+            exit 0
+          fi
+
       - name: Manual Commit
+        if: steps.check-diff.outputs.exit-code == 0
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -A
-          git commit -m "Manual commit after nvfetcher update"
+          git commit -m "nvfetcher update"
           git push
 
       - name: Create Pull Request
+        if: steps.check-diff.outputs.exit-code == 0
         run: |
-          gh pr create --title "Manual Update" --body "Manually created commit after nvfetcher update" --base main --head "Nvfetcher/update"
+          gh pr create --title "nvfetcher update" --body "Manually created commit after nvfetcher update" --base main --head Nvfetcher/update
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    env:
+      GITHUB_ACTIONS_QUIET: true
