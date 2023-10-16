@@ -16,14 +16,21 @@ jobs:
         uses: nixbuild/nix-quick-install-action@v25
 
       - name: Update nvfetcher
-        id: update
         run: |
           pushd pkgs
-          nix run github:berberman/nvfetcher -- --commit-changes
+          nix run github:berberman/nvfetcher
           popd
 
-      - name: merge
+      - name: Manual Commit
         run: |
-          gh pr merge ${{ steps.update.outputs.pull-request-number }} --squash --delete-branch
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Manual commit after nvfetcher update"
+          git push
+
+      - name: Create Pull Request
+        run: |
+          gh pr create --title "Manual Update" --body "Manually created commit after nvfetcher update" --base main --head "Nvfetcher/update"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
