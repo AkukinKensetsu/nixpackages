@@ -1,145 +1,138 @@
-{
-  lib,
-  stdenv,
-  fetchurl,
-  autoPatchelfHook,
-  dpkg,
-  makeWrapper,
-  wrapGAppsHook,
-  alsa-lib,
-  at-spi2-atk,
-  at-spi2-core,
-  atk,
-  cairo,
-  cups,
-  dbus,
-  expat,
-  ffmpeg,
-  fontconfig,
-  freetype,
-  gdk-pixbuf,
-  glib,
-  gtk3,
-  libappindicator-gtk3,
-  libdrm,
-  libnotify,
-  libpulseaudio,
-  libsecret,
-  libuuid,
-  libxkbcommon,
-  mesa,
-  nss,
-  pango,
-  systemd,
-  xdg-utils,
-  xorg,
-  wayland,
-  pipewire,
+{ lib
+, stdenv
+, stdenvNoCC
+, fetchFromGitHub
+, substituteAll
+, makeWrapper
+, makeDesktopItem
+, copyDesktopItems
+, vencord
+, electron
+, pipewire
+, libicns
+, jq
+, moreutils
+, nodePackages
 }:
 stdenv.mkDerivation rec {
   pname = "vesktop";
   version = "0.3.3";
 
-  # Copy paste from Armcord
-  src = let
-    base = "https://github.com/Vencord/Vesktop/releases/download";
-  in
-    {
-      x86_64-linux = fetchurl {
-        url = "${base}/v${version}/VencordDesktop_${version}_amd64.deb";
-        hash = "sha256-na/mcph9FkmUiLkpTMjl0ENbpJN1IvFC+eXVTSplP8g=";
-      };
-      # aarch64-linux = fetchurl {
-      #   url = "${base}/v${version}/VencordDesktop_${version}_arm64.deb";
-      #   hash = "";
-      # };
-    }
-    .${stdenv.hostPlatform.system}
-    or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
+  src = fetchFromGitHub {
+    owner = "Vencord";
+    repo = "Vesktop";
+    rev = "v${version}";
+    sha256 = "sha256-Njs3tACxUyRolYUtS/q2lITIQnUBFXVXWZEfQ66HpPM=";
+  };
 
-  nativeBuildInputs = [autoPatchelfHook dpkg makeWrapper wrapGAppsHook];
+  pnpm-deps = stdenvNoCC.mkDerivation {
+    pname = "${pname}-pnpm-deps";
+    inherit src version patches ELECTRON_SKIP_BINARY_DOWNLOAD;
 
-  dontWrapGApps = true;
+    nativeBuildInputs = [
+      jq
+      moreutils
+      nodePackages.pnpm
+    ];
 
-  buildInputs = [
-    alsa-lib
-    at-spi2-atk
-    at-spi2-core
-    atk
-    cairo
-    cups
-    dbus
-    expat
-    ffmpeg
-    fontconfig
-    freetype
-    gdk-pixbuf
-    glib
-    gtk3
-    pango
-    systemd
-    mesa # for libgbm
-    nss
-    libuuid
-    libdrm
-    libnotify
-    libsecret
-    libpulseaudio
-    libxkbcommon
-    libappindicator-gtk3
-    xorg.libX11
-    xorg.libxcb
-    xorg.libXcomposite
-    xorg.libXcursor
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXi
-    xorg.libXrandr
-    xorg.libXrender
-    xorg.libXScrnSaver
-    xorg.libxshmfence
-    xorg.libXtst
-    wayland
-    pipewire
+    # https://github.com/NixOS/nixpkgs/blob/763e59ffedb5c25774387bf99bc725df5df82d10/pkgs/applications/misc/pot/default.nix#L56
+    installPhase = ''
+      export HOME=$(mktemp -d)
+
+      pnpm config set store-dir $out
+      pnpm install --frozen-lockfile --ignore-script
+
+      rm -rf $out/v3/tmp
+      for f in $(find $out -name "*.json"); do
+        sed -i -E -e 's/"checkedAt":[0-9]+,//g' $f
+        jq --sort-keys . $f | sponge $f
+      done
+    '';
+
+    dontFixup = true;
+    outputHashMode = "recursive";
+    outputHash = "sha256-vInaSLGahRUgvwAeUcI+oV84L+tgNRCmfFpE0aUD4X4=";
+  };
+
+  nativeBuildInputs = [
+    copyDesktopItems
+    nodePackages.pnpm
+    nodePackages.nodejs
+    makeWrapper
   ];
 
-  sourceRoot = ".";
-  unpackCmd = "dpkg-deb -x $src .";
+  patches = [
+    (substituteAll { inherit vencord; src = ./use_system_vencord.patch; })
+  ];
 
-  installPhase = ''
-    runHook preInstall
+  ELECTRON_SKIP_BINARY_DOWNLOAD = 1;
 
-    mkdir -p "$out/bin"
-    cp -R "opt" "$out"
-    cp -R "usr/share" "$out/share"
-    chmod -R g-w "$out"
+  preBuild = ''
+    export HOME=$(mktemp -d)
+    export STORE_PATH=$(mktemp -d)
 
-    # Wrap the startup command
-    makeWrapper $out/opt/Vesktop/vencorddesktop $out/bin/vesktop \
-      "''${gappsWrapperArgs[@]}" \
-      --prefix XDG_DATA_DIRS : "${gtk3}/share/gsettings-schemas/${gtk3.name}/" \
-      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform=wayland --enable-features=UseOzonePlatform --enable-features=WebRTCPipeWireCapturer }}" \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath buildInputs}" \
-      --suffix PATH : ${lib.makeBinPath [xdg-utils]}
+    cp -r ${pnpm-deps}/* "$STORE_PATH"
+    chmod -R +w "$STORE_PATH"
 
-    # Fix desktop link
-    substituteInPlace $out/share/applications/vencorddesktop.desktop \
-      --replace /opt/Vesktop/ $out/bin/
-
-    runHook postInstall
+    pnpm config set store-dir "$STORE_PATH"
+    pnpm install --offline --frozen-lockfile --ignore-script
+    patchShebangs node_modules/{*,.*}
   '';
 
-  meta = {
-    description = "A cross platform electron-based desktop app aiming to give you a snappier Discord experience with Vencord pre-installed";
+  postBuild = ''
+    pnpm build
+    # using `pnpm exec` here apparently makes it ignore ELECTRON_SKIP_BINARY_DOWNLOAD
+    ./node_modules/.bin/electron-builder \
+      --dir \
+      -c.electronDist=${electron}/libexec/electron \
+      -c.electronVersion=${electron.version}
+  '';
+
+  # this is consistent with other nixpkgs electron packages and upstream, as far as I am aware
+  # yes, upstream really packages it as "vesktop" but uses "vencorddesktop" file names
+  installPhase =
+    let
+      libPath = lib.makeLibraryPath [ pipewire ];
+    in
+    ''
+      runHook preInstall
+
+      mkdir -p $out/opt/Vesktop/resources
+      cp dist/linux-unpacked/resources/app.asar $out/opt/Vesktop/resources
+
+      pushd build
+      ${libicns}/bin/icns2png -x icon.icns
+      for file in icon_*x32.png; do
+        file_suffix=''${file//icon_}
+        install -Dm0644 $file $out/share/icons/hicolor/''${file_suffix//x32.png}/apps/vencorddesktop.png
+      done
+
+      makeWrapper ${electron}/bin/electron $out/bin/vencorddesktop \
+        --prefix LD_LIBRARY_PATH : ${libPath} \
+        --add-flags $out/opt/Vesktop/resources/app.asar \
+        --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}"
+
+      runHook postInstall
+    '';
+
+  desktopItems = [
+    (makeDesktopItem {
+      name = "vencorddesktop";
+      desktopName = "Vesktop";
+      exec = "vencorddesktop %U";
+      icon = "vencorddesktop";
+      startupWMClass = "VencordDesktop";
+      genericName = "Internet Messenger";
+      keywords = [ "discord" "vencord" "electron" "chat" ];
+    })
+  ];
+
+  meta = with lib; {
+    description = "An alternate client for Discord with Vencord built-in";
     homepage = "https://github.com/Vencord/Vesktop";
-    sourceProvenance = with lib.sourceTypes; [binaryNativeCode];
-    license = lib.licenses.gpl3Plus;
-    maintainers = with lib.maintainers; [ludovicopiero];
-    platforms = [
-      "x86_64-linux"
-      # "aarch64-linux"
-    ];
-    mainProgram = "vesktop";
+    license = licenses.gpl3Only;
+    maintainers = with maintainers; [ getchoo Scrumplex vgskye ];
+    platforms = platforms.linux;
+    mainProgram = "vencorddesktop";
   };
 }
