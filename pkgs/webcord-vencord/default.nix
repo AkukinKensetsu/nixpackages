@@ -3,9 +3,8 @@
   substituteAll,
   lib,
   vencord-web-extension,
-  electron_27,
 }:
-(webcord.overrideAttrs (old: {
+webcord.overrideAttrs (old: {
   pname = "webcord-vencord";
 
   patches =
@@ -23,7 +22,4 @@
       description = "Webcord with Vencord web extension";
       maintainers = with maintainers; [FlafyDev ludovicopiero NotAShelf];
     };
-}))
-.override {
-  electron_25 = electron_27;
-}
+})
