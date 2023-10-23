@@ -8,7 +8,6 @@
   steam-run,
   withSteamRun ? true,
   pname ? "TLauncher",
-  source ? null,
 } @ args: let
   version = "2.86";
 
@@ -44,7 +43,7 @@ in
     meta = {
       description = "Minecraft Launcher";
       homepage = "https://tlaun.ch";
-      maintainers = [lib.maintainers.fufexan];
-      platforms = lib.platforms.linux;
+      maintainers = [lib.maintainers.ludovico];
+      platforms = ["x86_64-linux"];
     };
   }
