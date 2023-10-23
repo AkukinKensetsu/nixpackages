@@ -6,33 +6,6 @@
   darwin,
   remarshal,
   ttfautohint-nox,
-  # Custom font set options.
-  # See https://typeof.net/Iosevka/customizer
-  # Can be a raw TOML string, or a Nix attrset.
-  # Ex:
-  # privateBuildPlan = ''
-  #   [buildPlans.iosevka-custom]
-  #   family = "Iosevka Custom"
-  #   spacing = "normal"
-  #   serifs = "sans"
-  #
-  #   [buildPlans.iosevka-custom.variants.design]
-  #   capital-j = "serifless"
-  #
-  #   [buildPlans.iosevka-custom.variants.italic]
-  #   i = "tailed"
-  # '';
-  # Or:
-  # privateBuildPlan = {
-  #   family = "Iosevka Custom";
-  #   spacing = "normal";
-  #   serifs = "sans";
-  #
-  #   variants = {
-  #     design.capital-j = "serifless";
-  #     italic.i = "tailed";
-  #   };
-  # }
   privateBuildPlan ? ''
     [buildPlans.iosevka-q]
     family = "Iosevka q"
@@ -59,17 +32,7 @@
       [buildPlans.iosevka-q.ligations]
       inherits = "dlig"
   '',
-  # Extra parameters. Can be used for ligature mapping.
-  # It must be a raw TOML string.
-  # Ex:
-  # extraParameters = ''
-  #   [[iosevka.compLig]]
-  #   unicode = 57808 # 0xe1d0
-  #   featureTag = 'XHS0'
-  #   sequence = "+>"
-  # '';
   extraParameters ? null,
-  # Custom font set name. Required if any custom settings above.
   set ? "q",
 }:
 assert (privateBuildPlan != null) -> set != null;
@@ -79,16 +42,16 @@ assert (extraParameters != null) -> set != null;
       if set != null
       then "iosevka-${set}"
       else "iosevka";
-    version = "27.2.0";
+    version = "27.3.1";
 
     src = fetchFromGitHub {
       owner = "be5invis";
       repo = "iosevka";
       rev = "v${version}";
-      hash = "sha256-jRUwXnsYzM4BH+tEM6xuoB3/MFqbnR0deT3Slgkemvs=";
+      hash = "sha256-7ndJDdgDn5tnnUeB4etQ8bBZnH7NuiYoNQ9CrF2HtwQ=";
     };
 
-    npmDepsHash = "sha256-6ikjJScy6iL8lZ9eE2JBz7+egRCNli4XC9hnEalX408=";
+    npmDepsHash = "sha256-MNlT8VJTIvoZDAAdEs0Fa8gqO7dWhRR9I4Kw4qlW5Ig=";
 
     nativeBuildInputs =
       [
