@@ -16,6 +16,8 @@
   gdk-pixbuf,
   gtk3,
   harfbuzz,
+  libayatana-appindicator,
+  libdbusmenu,
   cups,
   nspr,
   nss_latest,
@@ -71,6 +73,8 @@
     glib
     gtk3
     harfbuzz
+    libayatana-appindicator
+    libdbusmenu
     libdrm
     libgcrypt
     libnotify
@@ -114,7 +118,7 @@ in
     # https://community.spotify.com/t5/Desktop-Linux/Redistribute-Spotify-on-Linux-Distributions/td-p/1695334
     src = fetchurl {
       url = "https://api.snapcraft.io/api/v1/snaps/download/pOBIoZ2LrCB3rDohMxoYGnbN14EHOgD7_${rev}.snap";
-      hash = "sha256-z5n20twTDQcTRnLWdITcJadKmSc0VGKXi3LAsu+ymgU=";
+      hash = "sha512-oxDUZqyMLxCbUBb1A+BBznByQ1rZAJcEIkaSUQ93/k1DX3rTaBHzEXmBtJhmN6L8L3fw1pa9GvE7eDaD8+jeGg==";
     };
 
     nativeBuildInputs = [wrapGAppsHook makeShellWrapper squashfsTools];
