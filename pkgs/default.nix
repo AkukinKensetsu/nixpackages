@@ -21,7 +21,7 @@
 
       spotify = pkgs.callPackage ./spotify {};
 
-      TLauncher = pkgs.callPackage ./TLauncher {};
+      # TLauncher = pkgs.callPackage ./TLauncher {};
 
       vesktop = pkgs.callPackage ./vesktop {};
 
